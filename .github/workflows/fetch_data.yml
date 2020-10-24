@@ -9,7 +9,7 @@ env:
 # events but only for the main branch
 on:
   schedule:
-    - cron:  '*/20 11-14 * * 1-6'
+    - cron:  '*/20 11-14 * * 1-5'
   workflow_dispatch:
     
 
