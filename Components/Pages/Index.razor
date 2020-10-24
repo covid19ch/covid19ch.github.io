@@ -1,0 +1,102 @@
+﻿@page "/"
+
+@inject DataPointProvider DataPointProvider;
+
+<h2 class="mdc-typography--headline2" style="text-align:center">Covid-19 situation in Switzerland</h2>
+<p>All data gathered from <a href="https://www.bag.admin.ch/">BAG</a>. No warranty for correctness. This site is not affiliated with the BAG in any way.</p>
+            
+<div style="display: grid;grid-template-columns: 1fr 1fr;grid-column-gap: 1em;">
+    <MBSelect @bind-Value="Type" Label="What to display" Items="Types" />
+    <MBSelect @bind-Value="Date" Label="Date" Items="Dates" />
+</div>
+<br />
+@{
+    Func<ExtendedDataPoint, ExtendedInput> type = Type switch
+    {
+        "Cases" => cases,
+        "Hospitalisations" => hospitalizations,
+        "Deaths" => deaths,
+        _ => cases
+    };
+    var current_data_source = DataPointProvider.Current.OrderBy(v => v.Date).TakeLast(18).SevenDayAverages().OrderByDescending(v => v.Date).ToList();
+    var current_new = type(current_data_source[4]).New;
+    var current_growth = type(current_data_source[4]).SevenDayAverage / type(current_data_source[11]).SevenDayAverage;
+    var current_daily_growth = current_growth == null ? default(double?) : Math.Pow(current_growth.Value, 1.0 / 7.0);
+    var current_cummulative = type(current_data_source[0]).Cumulative;
+    var faraway_days = (DataPointProvider.Population - (double) current_cummulative) / current_new;
+    var r = faraway_days - 1.0;
+    var doomsday_days = current_daily_growth == null ? default(double?) : Math.Log(r * current_daily_growth.Value - r) / Math.Log(current_daily_growth.Value);
+}
+@if (doomsday_days != null)
+{
+    var subject = Type.ToLower();
+    var verb = Type switch 
+    {
+        "Cases" => "infected",
+        "Hospitalisations" => "hospitalised",
+        "Deaths" => "dead",
+        _ => "infected"
+    };
+    <p>Would the number of @subject continue to rise as it does now (times @(Math.Round(current_growth.Value, 1)) per week), then the entire population would be @verb by @DateTime.Now.AddDays(doomsday_days.Value).Date.ToLongDateString()</p>
+    <p>Would the number of @subject stay the same as it is now (about @(current_new) a day), then the entire population would be @verb by @DateTime.Now.AddDays(faraway_days).Date.ToLongDateString()</p>
+}
+<br />
+
+<MBDataTable Items="@data_source">
+    <TableHeader>
+        <th class="mdc-data-table__header-cell header-bold" role="columnheader" scope="col">Date</th>
+        <th class="mdc-data-table__header-cell header-bold" role="columnheader" scope="col">New @Type</th>
+        <th class="mdc-data-table__header-cell header-bold" role="columnheader" scope="col">Cumulative @Type</th>
+        <th class="mdc-data-table__header-cell header-bold" role="columnheader" scope="col">@Type per 100 people</th>
+        <th class="mdc-data-table__header-cell header-bold" role="columnheader" scope="col">7d-average</th>
+        <th class="mdc-data-table__header-cell header-bold" role="columnheader" scope="col">Previous week</th>
+        <th class="mdc-data-table__header-cell header-bold" role="columnheader" scope="col">Increase since previous week</th>
+        <th class="mdc-data-table__header-cell header-bold" role="columnheader" scope="col">Doubling in new @(Type.ToLower()) every X days</th>
+    </TableHeader>
+    <TableRow>
+        <td class="mdc-data-table__cell">@context.Date.ToShortDateString()</td>
+        @{
+            var data = type(context);
+            var unreliable = (context.Date.AddDays(data.Unreliable) > data_source[0].Date);
+            var semi_unreliable = (context.Date.AddDays(data.SemiUnreliable) > data_source[0].Date);
+            var color = unreliable ? "lightgray" : (semi_unreliable ? "gray" : "black");
+            var factor = (data.SevenDayAverage ?? 0) / (data.SevenDayAverageAWeekEarlier ?? 1);
+            var increase = (factor - 1) * 100;
+            var increase_string = (increase > 0 ? "+" : "") + Math.Round(increase, 1).ToString() + " (x" + Math.Round(factor, 1).ToString() + ")";
+            if (data.SevenDayAverage == null || data.SevenDayAverageAWeekEarlier == null)
+            {
+                increase_string = null;
+            }
+            var doubling = 1 / Math.Log2(Math.Pow(factor, 1.0 / 7.0));
+            var doubling_string = (factor <= 1 || data.SevenDayAverage == null || data.SevenDayAverageAWeekEarlier == null) ? null : Math.Round(doubling, 1).ToString();
+        }
+        <td class="mdc-data-table__cell">@data.New</td>
+        <td class="mdc-data-table__cell">@data.Cumulative</td>
+        <td class="mdc-data-table__cell">@Math.Round(100 * data.Cumulative / (double)DataPointProvider.Population, 2)</td>
+        <td class="mdc-data-table__cell" style="color: @(color)">
+            @(data.SevenDayAverage == null ? null : Math.Round(data.SevenDayAverage.Value, 1))
+        </td>
+        <td class="mdc-data-table__cell" style="color: @(color)">
+            @(data.SevenDayAverageAWeekEarlier == null ? null : Math.Round(data.SevenDayAverageAWeekEarlier.Value))
+        </td>
+        <td class="mdc-data-table__cell" style="color: @(color)">@(increase_string)</td>
+        <td class="mdc-data-table__cell" style="color: @(color)">@(doubling_string)</td>
+    </TableRow>
+</MBDataTable>
+
+@code {
+    MBListElement<string>[] Types = new MBListElement<string>[]
+    {
+        new MBListElement<string> { SelectedValue = "Cases", Label = "Cases" },
+        new MBListElement<string> { SelectedValue = "Hospitalisations", Label = "Hospitalisations" },
+        new MBListElement<string> { SelectedValue = "Deaths", Label = "Deaths" }
+        };
+    MBListElement<string>[] Dates => DataPointProvider.All.Keys.Select(k => new MBListElement<string> { SelectedValue = k, Label = k }).ToArray();
+    private List<DataPoint> source => Date == null ? DataPointProvider.Current : DataPointProvider.All[Date];
+    private List<ExtendedDataPoint> data_source => source.SevenDayAverages().OrderByDescending(v => v.Date).Take(62).PrependUpTo(DataPointProvider.Current.Max(d => d.Date)).ToList();
+    private string Type { get; set; } = "Cases";
+    private string Date { get; set; } = DataPointProvider.MostRecent;
+    private static Func<ExtendedDataPoint, ExtendedInput> cases = (d) => d.Cases;
+    private static Func<ExtendedDataPoint, ExtendedInput> hospitalizations = (d) => d.Hospitalisations;
+    private static Func<ExtendedDataPoint, ExtendedInput> deaths = (d) => d.Deaths;
+}
