@@ -38,7 +38,7 @@ namespace DataAggregator
             {
                 var files = context.AdditionalFiles.Where(i => i.Path.EndsWith("xlsx")).OrderBy(f => f.Path).ToList();
                 context.ReportDiagnostic(Diagnostic.Create(FileProcessed, null, files.Count));
-                var dates = new List<DateTime>();
+                var dates = new HashSet<DateTime>();
                 foreach (var input_file in files)
                 {
                     using var stream = File.OpenRead(input_file.Path);
@@ -57,8 +57,9 @@ Deaths = ({row.NewDeaths ?? 0}, {row.CummulativeDeaths ?? 0})  }},
 ");
                     }
                     var identifier = $"stats_{rows.Last().Date.Year}_{rows.Last().Date.Month}_{rows.Last().Date.Day}";
-                    dates.Add(rows.Last().Date);
-                    var code = $@"
+                    if (dates.Add(rows.Last().Date))
+                    {
+                        var code = $@"
 using System;
 using System.Collections.Generic;
 namespace CovidStatsCH.Components
@@ -72,8 +73,9 @@ namespace CovidStatsCH.Components
     }}
 }}
 ";
-                    context.AddSource(identifier, code);
-                    context.ReportDiagnostic(Diagnostic.Create(FileProcessed, null, input_file.Path));
+                        context.AddSource(identifier, code);
+                        context.ReportDiagnostic(Diagnostic.Create(FileProcessed, null, input_file.Path));
+                    }
                 }
                 var last_day = dates.OrderBy(v => v).Last();
                 var last_day_identifier = $"stats_{last_day.Year}_{last_day.Month}_{last_day.Day}";
