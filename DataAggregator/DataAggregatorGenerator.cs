@@ -29,6 +29,7 @@ namespace DataAggregator
             description: ".");
         public void Execute(GeneratorExecutionContext context)
         {
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             if (context.AdditionalFiles == null)
             {
                 return;
@@ -41,7 +42,7 @@ namespace DataAggregator
                 foreach (var input_file in files)
                 {
                     using var stream = File.OpenRead(input_file.Path);
-                    using var reader = ExcelReaderFactory.CreateReader(stream, new ExcelReaderConfiguration { FallbackEncoding = Encoding.UTF8 });
+                    using var reader = ExcelReaderFactory.CreateReader(stream);
                     AdvanceToData(reader);
                     var rows = GetRows(reader).ToList();
                     var string_builder = new StringBuilder();
