@@ -28,12 +28,13 @@ jobs:
     - name: wget
       uses: wei/wget@v1
       with:
-        args: ${{ env.bag_url }} -O ${{ steps.date.outputs.date }}.xlsx
+        args: ${{ env.bag_url }} -O Data/${{ steps.date.outputs.date }}.xlsx
     - name: Commit files
       run: |
         git config --local user.email "noreply@automation.none"
         git config --local user.name "Automation"
-        git commit -m "Add current file" -a
+        git add Data/${{ steps.date.outputs.date }}.xlsx
+        git commit -m "Add current file"
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
