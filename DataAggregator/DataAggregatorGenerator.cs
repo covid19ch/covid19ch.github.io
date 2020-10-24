@@ -41,7 +41,7 @@ namespace DataAggregator
                 foreach (var input_file in files)
                 {
                     using var stream = File.OpenRead(input_file.Path);
-                    using var reader = ExcelReaderFactory.CreateReader(stream);
+                    using var reader = ExcelReaderFactory.CreateReader(stream, new ExcelReaderConfiguration { FallbackEncoding = Encoding.UTF8 });
                     AdvanceToData(reader);
                     var rows = GetRows(reader).ToList();
                     var string_builder = new StringBuilder();

@@ -3,13 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30615.102
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientSide", "ClientSide\ClientSide.csproj", "{2303AA2D-A01C-471E-A9B4-6146E5BBB2ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientSide", "ClientSide\ClientSide.csproj", "{2303AA2D-A01C-471E-A9B4-6146E5BBB2ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Components", "Components\Components.csproj", "{E4F648B3-2602-44FF-8CA0-3CED96BC4CB4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Components", "Components\Components.csproj", "{E4F648B3-2602-44FF-8CA0-3CED96BC4CB4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerSide", "ServerSide\ServerSide.csproj", "{845C9C17-FEA0-4D01-B80D-4D0CAEA0205F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerSide", "ServerSide\ServerSide.csproj", "{845C9C17-FEA0-4D01-B80D-4D0CAEA0205F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAggregator", "DataAggregator\DataAggregator.csproj", "{2ED5BC0D-A037-42C7-A413-9F6D1BADFFEC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAggregator", "DataAggregator\DataAggregator.csproj", "{2ED5BC0D-A037-42C7-A413-9F6D1BADFFEC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{92946683-651F-4A22-940B-E580D6EE8850}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\dotnet-core.yml = .github\workflows\dotnet-core.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
