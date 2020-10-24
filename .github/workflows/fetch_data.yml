@@ -31,6 +31,8 @@ jobs:
         args: ${{ env.bag_url }} -O ${{ steps.date.outputs.date }}.xlsx
     - name: Commit files
       run: |
+        git config --local user.email "noreply@automation.none"
+        git config --local user.name "Automation"
         git commit -m "Add current file" -a
     - name: Push changes
       uses: ad-m/github-push-action@master
