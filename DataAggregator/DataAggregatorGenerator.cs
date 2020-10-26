@@ -89,7 +89,6 @@ namespace CovidStatsCH.Components
     {{
         public static readonly string MostRecent = ""{last_day.ToLongDateString()}"";
         public static readonly List<DataPoint> Current = {last_day_identifier};
-        public static readonly List<ExtendedDataPoint> ExtendedCurrent = Current.SevenDayAverages().OrderByDescending(v => v.Date).Take(62).ToList();
         public static readonly Dictionary<string, List<DataPoint>> All = new Dictionary<string, List<DataPoint>>
         {{
             {string.Join(",\n", dates.Select(d =>
@@ -99,6 +98,7 @@ namespace CovidStatsCH.Components
                     return $"[\"{human_readable}\"] = DataPointProvider.{identifier}";
                 }))}
         }};
+        public static readonly List<ExtendedDataPoint> ExtendedCurrent = Current.SevenDayAverages().OrderByDescending(v => v.Date).Take(62).ToList();
         public static readonly Dictionary<string, List<ExtendedDataPoint>> ExtendedAll = new Dictionary<string, List<ExtendedDataPoint>>
         {{
             {string.Join(",\n", dates.Select(d =>
@@ -106,6 +106,16 @@ namespace CovidStatsCH.Components
                     var human_readable = d.ToLongDateString();
                     var identifier = $"stats_{d.Year}_{d.Month}_{d.Day}";
                     return $"[\"{human_readable}\"] = DataPointProvider.{identifier}.SevenDayAverages().OrderByDescending(v => v.Date).Take(62).PrependUpTo(DataPointProvider.Current.Max(d => d.Date)).ToList()";
+                }))}
+        }};
+        public static readonly List<ComparedExtendedDataPoint> ComparedExtendedCurrent = ExtendedCurrent.Compare();
+        public static readonly Dictionary<string, List<ComparedExtendedDataPoint>> ComparedExtendedAll = new Dictionary<string, List<ComparedExtendedDataPoint>>
+        {{
+            {string.Join(",\n", dates.Select(d =>
+                {
+                    var human_readable = d.ToLongDateString();
+                    var identifier = $"stats_{d.Year}_{d.Month}_{d.Day}";
+                    return $"[\"{human_readable}\"] = DataPointProvider.ExtendedAll[\"{human_readable}\"].Compare()";
                 }))}
         }};
         

@@ -17,7 +17,7 @@
 		<PackageReference Include="Material.Blazor" Version="1.0.0-rc.6" />
 	</ItemGroup>
 	<ItemGroup>
-		<AdditionalFiles Include="../Data/**/*.xlsx" />
+		<AdditionalFiles Include="../Data/**/*" />
 		<ProjectReference Include="../DataAggregator/DataAggregator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
