@@ -8,7 +8,7 @@ env:
 
 on:
   schedule:
-    - cron:  '05,25,45 11-14 * * 1-5'
+    - cron:  '2,7,12,17,22,27,32,37,42,47,52,57 11-14 * * 1-5'
   push:
     branches: [ main ]
   pull_request:
