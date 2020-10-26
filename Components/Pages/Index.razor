@@ -18,7 +18,7 @@
         "Deaths" => deaths,
         _ => cases
     };
-    var current_data_source = DataPointProvider.Current.OrderBy(v => v.Date).TakeLast(18).SevenDayAverages().OrderByDescending(v => v.Date).ToList();
+    var current_data_source = DataPointProvider.ExtendedCurrent.OrderByDescending(v => v.Date).ToList();
     var current_new = type(current_data_source[4]).New;
     var current_growth = type(current_data_source[4]).SevenDayAverage / type(current_data_source[11]).SevenDayAverage;
     var current_daily_growth = current_growth == null ? default(double?) : Math.Pow(current_growth.Value, 1.0 / 7.0);
@@ -92,8 +92,7 @@
         new MBListElement<string> { SelectedValue = "Deaths", Label = "Deaths" }
         };
     MBListElement<string>[] Dates => DataPointProvider.All.Keys.Select(k => new MBListElement<string> { SelectedValue = k, Label = k }).ToArray();
-    private List<DataPoint> source => Date == null ? DataPointProvider.Current : DataPointProvider.All[Date];
-    private List<ExtendedDataPoint> data_source => source.SevenDayAverages().OrderByDescending(v => v.Date).Take(62).PrependUpTo(DataPointProvider.Current.Max(d => d.Date)).ToList();
+    private List<ExtendedDataPoint> data_source => Date == null ? DataPointProvider.ExtendedCurrent : DataPointProvider.ExtendedAll[Date];
     private string Type { get; set; } = "Cases";
     private string Date { get; set; } = DataPointProvider.MostRecent;
     private static Func<ExtendedDataPoint, ExtendedInput> cases = (d) => d.Cases;

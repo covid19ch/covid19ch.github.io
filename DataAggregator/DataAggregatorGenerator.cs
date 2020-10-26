@@ -81,6 +81,7 @@ namespace CovidStatsCH.Components
                 var last_day_identifier = $"stats_{last_day.Year}_{last_day.Month}_{last_day.Day}";
                 var final_code = $@"
 using System;
+using System.Linq;
 using System.Collections.Generic;
 namespace CovidStatsCH.Components
 {{
@@ -88,15 +89,26 @@ namespace CovidStatsCH.Components
     {{
         public static readonly string MostRecent = ""{last_day.ToLongDateString()}"";
         public static readonly List<DataPoint> Current = {last_day_identifier};
+        public static readonly List<ExtendedDataPoint> ExtendedCurrent = Current.SevenDayAverages().OrderByDescending(v => v.Date).Take(62).ToList();
         public static readonly Dictionary<string, List<DataPoint>> All = new Dictionary<string, List<DataPoint>>
         {{
-            {string.Join(",\n", dates.Select(d => 
+            {string.Join(",\n", dates.Select(d =>
                 {
                     var human_readable = d.ToLongDateString();
                     var identifier = $"stats_{d.Year}_{d.Month}_{d.Day}";
                     return $"[\"{human_readable}\"] = DataPointProvider.{identifier}";
                 }))}
         }};
+        public static readonly Dictionary<string, List<ExtendedDataPoint>> ExtendedAll = new Dictionary<string, List<ExtendedDataPoint>>
+        {{
+            {string.Join(",\n", dates.Select(d =>
+                {
+                    var human_readable = d.ToLongDateString();
+                    var identifier = $"stats_{d.Year}_{d.Month}_{d.Day}";
+                    return $"[\"{human_readable}\"] = DataPointProvider.{identifier}.SevenDayAverages().OrderByDescending(v => v.Date).Take(62).PrependUpTo(DataPointProvider.Current.Max(d => d.Date)).ToList()";
+                }))}
+        }};
+        
     }}
 }}
 ";
