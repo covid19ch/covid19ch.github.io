@@ -1,0 +1,95 @@
+﻿@page "/delay"
+
+@inject DataPointProvider DataPointProvider;
+
+<h2 class="mdc-typography--headline2" style="text-align:center">Covid-19 situation in Switzerland</h2>
+<p>All data gathered from <a href="https://www.bag.admin.ch/">BAG</a>. No warranty for correctness. This site is not affiliated with the BAG in any way.</p>
+            
+<div>
+    <MBSelect @bind-Value="Type" Label="What to display" Items="Types" />
+    <MBCheckbox @bind-Value="AbsoluteValues" Label="Absolute values" />
+</div>
+<br />
+
+<MBDataTable Items="@delays">
+    <TableHeader>
+        <th class="mdc-data-table__header-cell header-bold" role="columnheader" scope="col">Date</th>
+        @{
+            var longest_chain = @delays.Values.Max(e => e.Count);
+        }
+        @for (int i = 1; i <= 7; ++i)
+        {
+            <th @key="@i" class="mdc-data-table__header-cell header-bold" role="columnheader" scope="col">@(-i)d</th>
+        }
+        <th class="mdc-data-table__header-cell header-bold" role="columnheader" scope="col">&gt;-7d</th>
+    </TableHeader>
+    <TableRow>
+        <td class="mdc-data-table__cell">@context.Key</td>
+        @{
+            var total = context.Value.Where(v => v != null).Sum(v => (double)v.Value);
+        }
+        @for (int i = 1; i <= 7 && i < context.Value.Count; ++i)
+        {
+            var delay = context.Value[i - 1];
+            <td @key="i" class="mdc-data-table__cell">
+                @if (delay != null)
+                {
+                    @if (AbsoluteValues)
+                    {
+                        <text>@(delay.Value)</text>
+                    }
+                    else
+                    {
+                        <text>@(Math.Round(100 * delay.Value / total, 2))%</text>
+                    }
+                }
+            </td>
+        }
+        <td class="mdc-data-table__cell">
+            @{
+                var rdelay = context.Value.Skip(7).Where(v => v != null).Sum(v => (double)v.Value);
+            }
+            @if (AbsoluteValues)
+            {
+                <text>@(rdelay)</text>
+            }
+            else
+            {
+                <text>@(Math.Round(100 * rdelay / total, 2))%</text>
+            }
+        </td>
+    </TableRow>
+</MBDataTable>
+
+@code {
+    private bool AbsoluteValues { get; set; }
+    MBListElement<string>[] Types = new MBListElement<string>[]
+    {
+        new MBListElement<string> { SelectedValue = "Cases", Label = "Cases" },
+        new MBListElement<string> { SelectedValue = "Hospitalisations", Label = "Hospitalisations" },
+        new MBListElement<string> { SelectedValue = "Deaths", Label = "Deaths" }
+        };
+    private string Type { get; set; } = "Cases";
+    private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> cases = (d) => d.Cases;
+    private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> hospitalizations = (d) => d.Hospitalisations;
+    private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> deaths = (d) => d.Deaths;
+    List<string> Dates => DataPointProvider.All.Keys.ToList();
+    private Func<ComparedExtendedDataPoint, ComparedExtendedInput> type => Type switch
+    {
+        "Cases" => cases,
+        "Hospitalisations" => hospitalizations,
+        "Deaths" => deaths,
+        _ => cases
+    };
+    private Dictionary<string, List<int?>> delays => DataPointProvider.ComparedExtendedAll
+        .Where(kv => kv.Value.Any(e => type(e).Additional != null))
+        .ToDictionary(kv => kv.Key, kv => 
+            kv.Value
+                .SkipWhile(e => e.Date.Date >= DateTime.Parse(kv.Key).Date)
+                .Select(e => type(e).Additional)
+                .Reverse()
+                .SkipWhile(e => e == 0)
+                .Reverse()
+                .Take(14)
+                .ToList());
+}
