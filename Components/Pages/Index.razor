@@ -19,7 +19,7 @@
         _ => cases
     };
     var current_data_source = DataPointProvider.ComparedExtendedCurrent;
-    var current_new = type(current_data_source[4]).New;
+    var current_new = type(current_data_source[4]).SevenDayAverage.Value;
     var current_growth = type(current_data_source[4]).SevenDayAverage / type(current_data_source[11]).SevenDayAverage;
     var current_daily_growth = current_growth == null ? default(double?) : Math.Pow(current_growth.Value, 1.0 / 7.0);
     var current_cummulative = type(current_data_source[0]).Cumulative;
@@ -38,7 +38,7 @@
         _ => "infected"
     };
     <p>Would the number of @subject continue to rise as it does now (times @(Math.Round(current_growth.Value, 1)) per week), then the entire population would be @verb by @DateTime.Now.AddDays(doomsday_days.Value).Date.ToLongDateString()</p>
-    <p>Would the number of @subject stay the same as it is now (about @(current_new) a day), then the entire population would be @verb by @DateTime.Now.AddDays(faraway_days).Date.ToLongDateString()</p>
+    <p>Would the number of @subject stay the same as it is now (about @(current_new) a day, the 7-day-average), then the entire population would be @verb by @DateTime.Now.AddDays(faraway_days).Date.ToLongDateString()</p>
 }
 <br />
 
