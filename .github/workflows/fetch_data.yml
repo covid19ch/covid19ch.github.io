@@ -28,13 +28,22 @@ jobs:
       uses: wei/wget@v1
       with:
         args: ${{ env.bag_url }} -O Data/${{ steps.date.outputs.date }}.xlsx
+    - name: Check if newer
+      id: newer
+      run: |
+        unique=$(md5sum Data/* | cut -d' ' -f1 | sort -u | wc -l)
+        total=$(find Data -type f | wc -l)
+        echo "::set-output name=new_file::$([[ $unique -eq $total ]] && echo true || echo false)"
+    - name: Display if newer
+      run: |
+        echo ${{ steps.newer.outputs.new_file }}
     - name: Commit files
       run: |
         git config --local user.email "noreply@automation.none"
         git config --local user.name "Automation"
         git add Data/${{ steps.date.outputs.date }}.xlsx
         git commit -m "Add current file"
-      if: ${{ [$(md5sum Data/* | cut -d' ' -f1 | sort -u | wc -l) -eq $(find Data -type f | wc -l)] }}
+      if: ${{ steps.newer.outputs.new_file == 'true' }}
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
