@@ -33,17 +33,16 @@ jobs:
       run: |
         unique=$(md5sum Data/* | cut -d' ' -f1 | sort -u | wc -l)
         total=$(find Data -type f | wc -l)
-        echo "::set-output name=new_file::$([[ $unique -eq $total ]] && echo true || echo false)"
-    - name: Display if newer
-      run: |
-        echo ${{ steps.newer.outputs.new_file }}
+        if [ $unique -lt $total ]
+        then
+          exit 1
+        fi
     - name: Commit files
       run: |
         git config --local user.email "noreply@automation.none"
         git config --local user.name "Automation"
         git add Data/${{ steps.date.outputs.date }}.xlsx
         git commit -m "Add current file"
-      if: ${{ steps.newer.outputs.new_file == 'true' }}
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
