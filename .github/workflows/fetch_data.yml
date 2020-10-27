@@ -28,6 +28,15 @@ jobs:
       uses: wei/wget@v1
       with:
         args: ${{ env.bag_url }} -O Data/${{ steps.date.outputs.date }}.xlsx
+    - name: Check if newer
+      id: newer
+      run: |
+        unique=$(md5sum Data/* | cut -d' ' -f1 | sort -u | wc -l)
+        total=$(find Data -type f | wc -l)
+        echo "::set-output name=new_file::$([ $unique -t $total ])"
+    - name: Display if newer
+      run: |
+        echo ${{ steps.newer.outputs.new_file }}
     - name: Commit files
       run: |
         git config --local user.email "noreply@automation.none"
