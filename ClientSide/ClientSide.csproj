@@ -8,6 +8,7 @@
 		<RootNamespace>CovidStatsCH.Client</RootNamespace>
 		<BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
 		<DxExtendStartupHost>False</DxExtendStartupHost>
+		<PublishTrimmed>false</PublishTrimmed>
 	</PropertyGroup>
 
 	<ItemGroup>
