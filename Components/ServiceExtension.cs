@@ -8,6 +8,7 @@ namespace CovidStatsCH.Components
     {
         public static IServiceCollection AddCovidStatsCHGameServices(this IServiceCollection services)
         {
+            services.AddDevExpressBlazor();
             return services
                 .AddMBServices()
                 .AddSingleton<DataPointProvider>();

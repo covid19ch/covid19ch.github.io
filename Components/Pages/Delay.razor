@@ -61,6 +61,20 @@
     </TableRow>
 </MBDataTable>
 
+<div style="max-width:80em">
+    <DxChart Data="delays_as_series">
+        <DxChartCommonSeries ArgumentField="@((Delays i) => i.RelativeDay)"
+                            ValueField="@((Delays i) => i.Value)"
+                            NameField="@((Delays i) => i.ReportDay)"
+                            SeriesType="ChartSeriesType.Bar"/>
+        <DxChartLegend Orientation="Orientation.Vertical"
+                       HorizontalAlignment="HorizontalAlignment.Right"
+                       Position="RelativePosition.Outside"
+                       AllowToggleSeries="true"/>
+    </DxChart>
+</div>
+
+
 @code {
     private bool AbsoluteValues { get; set; }
     MBListElement<string>[] Types = new MBListElement<string>[]
@@ -92,4 +106,21 @@
                 .Reverse()
                 .Take(14)
                 .ToList());
+    private class Delays
+    {
+        public string RelativeDay {get;set;}
+        public string ReportDay {get;set;}
+        public double Value {get;set;}
+    }
+    private List<Delays> delays_as_series => delays.Keys.SelectMany(key => Enumerable.Range(1, 7).Select(i => new Delays 
+    { 
+        RelativeDay = "-" + i.ToString() + "d",
+        ReportDay = key,
+        Value = (i < delays[key].Count) ? (delays[key][i] ?? 0) / (AbsoluteValues ? 1 : delays[key].Where(v => v != null).Sum(v => (double)v.Value)) : 0
+    }).Append(new Delays 
+    { 
+        RelativeDay = ">-7d",
+        ReportDay = key,
+        Value = delays[key].Skip(7).Select(v => v ?? 0).Sum() / (AbsoluteValues ? 1 : delays[key].Where(v => v != null).Sum(v => (double)v.Value))
+    })).ToList();
 }

@@ -7,6 +7,7 @@
 		<TargetFramework>net5.0</TargetFramework>
 		<RootNamespace>CovidStatsCH.Client</RootNamespace>
 		<BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+		<DxExtendStartupHost>False</DxExtendStartupHost>
 	</PropertyGroup>
 
 	<ItemGroup>
