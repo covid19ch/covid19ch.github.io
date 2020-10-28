@@ -16,7 +16,7 @@ namespace WebApplication1
             builder.RootComponents.Add<App>("#app");
             CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-CH");
             CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-CH");
-            builder.Services.AddCovidStatsCHGameServices();
+            builder.Services.AddCovidStatsCHServices();
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
             await builder.Build().RunAsync();

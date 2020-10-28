@@ -22,7 +22,7 @@ namespace CovidStatsCH.Server
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddCovidStatsCHGameServices();
+            services.AddCovidStatsCHServices();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
