@@ -1,0 +1,74 @@
+﻿@page "/forecast"
+
+@inject DataPointProvider DataPointProvider;
+
+<h2 class="mdc-typography--headline2" style="text-align:center">Covid-19 situation in Switzerland</h2>
+<p>All data gathered from <a href="https://www.bag.admin.ch/">BAG</a>. No warranty for correctness. This site is not affiliated with the BAG in any way.</p>
+
+<p>Disclaimer: this forecast does not aim at being anywhere close to a proper model. This is simply the projection under the assumption that the exponential growth as measured a few days ago continues for two weeks.</p>
+
+<div style="display: grid;grid-template-columns: 1fr 1fr;grid-column-gap: 1em;">
+    <MBSelect @bind-Value="Type" Label="What to display" Items="Types" />
+</div>
+<br />
+
+<div style="max-width:80em">
+@if (projection != null)
+{
+    <DxChart Data="projection">
+        <DxChartCommonSeries ArgumentField="@((Data i) => i.Day)"
+                            ValueField="@((Data i) => i.Value)"
+                            NameField="@((Data i) => i.Type)"
+                            SeriesType="ChartSeriesType.Line"/>
+        <DxChartLegend Orientation="Orientation.Vertical"
+                       HorizontalAlignment="HorizontalAlignment.Right"
+                       Position="RelativePosition.Outside"
+                       AllowToggleSeries="true"/>
+    </DxChart>
+}
+</div>
+
+
+@code {
+    private class Data
+    {
+        public DateTime Day { get; set; } 
+        public double Value { get; set; }
+        public string Type { get; set; }
+    }
+    private List<Data> projection => DataPointProvider.ComparedExtendedCurrent.Select(e => new Data { Day = e.Date, Value = type(e).Cumulative, Type= "Past" }).Concat(GetForecast()).ToList();
+    
+    Func<ComparedExtendedDataPoint, ComparedExtendedInput> type => Type switch
+    {
+        "Cases" => cases,
+        "Hospitalisations" => hospitalizations,
+        "Deaths" => deaths,
+        _ => cases
+    };
+    private List<Data> GetForecast()
+    {
+        double current_new = type(DataPointProvider.ComparedExtendedCurrent[4]).SevenDayAverage.Value;
+        double? current_growth = type(DataPointProvider.ComparedExtendedCurrent[4]).SevenDayAverage / type(DataPointProvider.ComparedExtendedCurrent[11]).SevenDayAverage;
+        double? current_daily_growth = current_growth == null ? default(double?) : Math.Pow(current_growth.Value, 1.0 / 7.0);
+        int current = type(DataPointProvider.ComparedExtendedCurrent.First()).Cumulative;
+        var forecast = new List<Data>();
+        var last_day = DataPointProvider.ComparedExtendedCurrent.First().Date;
+        for (int i = 0; i < 14; ++i)
+        {
+            current_new *= current_daily_growth.Value;
+            current += (int) current_new;
+            forecast.Add(new Data { Day = last_day.AddDays(i + 1), Value = current, Type = "Projection" });
+        }
+        return forecast;
+    }
+    MBListElement<string>[] Types = new MBListElement<string>[]
+    {
+        new MBListElement<string> { SelectedValue = "Cases", Label = "Cases" },
+        new MBListElement<string> { SelectedValue = "Hospitalisations", Label = "Hospitalisations" },
+        new MBListElement<string> { SelectedValue = "Deaths", Label = "Deaths" }
+        };
+    private string Type { get; set; } = "Cases";
+    private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> cases = (d) => d.Cases;
+    private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> hospitalizations = (d) => d.Hospitalisations;
+    private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> deaths = (d) => d.Deaths;
+}
