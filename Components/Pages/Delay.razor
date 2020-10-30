@@ -112,7 +112,7 @@
         public string ReportDay {get;set;}
         public double Value {get;set;}
     }
-    private List<Delays> delays_as_series => delays.Keys.SelectMany(key => Enumerable.Range(1, 7).Select(i => new Delays 
+    private List<Delays> delays_as_series => delays.Keys.SelectMany(key => Enumerable.Range(0, 7).Select(i => new Delays 
     { 
         RelativeDay = "-" + i.ToString() + "d",
         ReportDay = key,
