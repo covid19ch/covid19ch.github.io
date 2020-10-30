@@ -114,7 +114,7 @@
     }
     private List<Delays> delays_as_series => delays.Keys.SelectMany(key => Enumerable.Range(0, 7).Select(i => new Delays 
     { 
-        RelativeDay = "-" + i.ToString() + "d",
+        RelativeDay = "-" + (i + 1).ToString() + "d",
         ReportDay = key,
         Value = (i < delays[key].Count) ? (delays[key][i] ?? 0) / (AbsoluteValues ? 1 : delays[key].Where(v => v != null).Sum(v => (double)v.Value)) : 0
     }).Append(new Delays 
