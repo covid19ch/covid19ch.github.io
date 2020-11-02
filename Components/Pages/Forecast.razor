@@ -9,6 +9,7 @@
 
 <div style="display: grid;grid-template-columns: 1fr 1fr;grid-column-gap: 1em;">
     <MBSelect @bind-Value="Type" Label="What to display" Items="Types" />
+    <MBCheckbox @bind-Value="Logarithmic" Label="Logarithmic plot" />
 </div>
 <br />
 
@@ -16,6 +17,7 @@
 @if (projection != null)
 {
     <DxChart Data="projection">
+    <DxChartValueAxis Type="@(Logarithmic ? ChartAxisType.Logarithmic : ChartAxisType.Continuous)" />
         <DxChartCommonSeries ArgumentField="@((Data i) => i.Day)"
                             ValueField="@((Data i) => i.Value)"
                             NameField="@((Data i) => i.Type)"
@@ -30,13 +32,14 @@
 
 
 @code {
+    private bool Logarithmic {get;set;}
     private class Data
     {
         public DateTime Day { get; set; } 
         public double Value { get; set; }
         public string Type { get; set; }
     }
-    private List<Data> projection => DataPointProvider.ComparedExtendedCurrent.Select(e => new Data { Day = e.Date, Value = type(e).Cumulative, Type= "Past" }).Concat(GetForecast()).ToList();
+    private List<Data> projection => DataPointProvider.ComparedExtendedCurrent.Select(e => new Data { Day = e.Date, Value = type(e).Cumulative, Type= "Past" }).OrderByDescending(v => v.Day).Skip(3).Take(18).Concat(GetForecast()).ToList();
     
     Func<ComparedExtendedDataPoint, ComparedExtendedInput> type => Type switch
     {
@@ -50,9 +53,9 @@
         double current_new = type(DataPointProvider.ComparedExtendedCurrent[4]).SevenDayAverage.Value;
         double? current_growth = type(DataPointProvider.ComparedExtendedCurrent[4]).SevenDayAverage / type(DataPointProvider.ComparedExtendedCurrent[11]).SevenDayAverage;
         double? current_daily_growth = current_growth == null ? default(double?) : Math.Pow(current_growth.Value, 1.0 / 7.0);
-        int current = type(DataPointProvider.ComparedExtendedCurrent.First()).Cumulative;
+        int current = type(DataPointProvider.ComparedExtendedCurrent.Skip(3).First()).Cumulative;
         var forecast = new List<Data>();
-        var last_day = DataPointProvider.ComparedExtendedCurrent.First().Date;
+        var last_day = DataPointProvider.ComparedExtendedCurrent.Skip(3).First().Date;
         for (int i = 0; i < 14; ++i)
         {
             current_new *= current_daily_growth.Value;
