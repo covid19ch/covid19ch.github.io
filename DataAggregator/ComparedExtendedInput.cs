@@ -1,8 +1,14 @@
-﻿namespace CovidStatsCH.Components
+﻿using System.Text.Json.Serialization;
+
+namespace CovidStatsCH.Components
 {
     public class ComparedExtendedInput : ExtendedInput
     {
         public int? Additional { get; set; }
+        [JsonConstructor]
+        public ComparedExtendedInput()
+        {
+        }
         public ComparedExtendedInput(ExtendedInput input, int? additional)
         {
             Additional = additional;

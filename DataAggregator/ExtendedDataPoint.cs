@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace CovidStatsCH.Components
 {
     public class ExtendedDataPoint
     {
+        [JsonConstructor]
         public ExtendedDataPoint()
         {
         }

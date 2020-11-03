@@ -13,13 +13,13 @@ namespace CovidStatsCH.Components
             {
                 return default;
             }
-            var current_date = System.DateTime.Parse(match.Key);
-            var previous_key = ExtendedAll.Keys.Select(k => System.DateTime.Parse(k)).OrderBy(k => k).TakeWhile(k => k < current_date).LastOrDefault();
+            var current_date = match.Key;
+            var previous_key = ExtendedAll.Keys.OrderBy(k => k).TakeWhile(k => k < current_date).LastOrDefault();
             if (previous_key == default)
             {
                 return default;
             }
-            return ExtendedAll[previous_key.ToLongDateString()];
+            return ExtendedAll[previous_key];
         }
     }
 }

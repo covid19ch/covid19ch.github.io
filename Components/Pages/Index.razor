@@ -98,7 +98,7 @@
     private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> cases = (d) => d.Cases;
     private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> hospitalizations = (d) => d.Hospitalisations;
     private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> deaths = (d) => d.Deaths;
-    MBListElement<string>[] Dates => DataPointProvider.All.Keys.Select(k => new MBListElement<string> { SelectedValue = k, Label = k }).ToArray();
-    private List<ComparedExtendedDataPoint> data_source => Date == null ? DataPointProvider.ComparedExtendedCurrent : DataPointProvider.ComparedExtendedAll[Date];
-    private string Date { get; set; } = DataPointProvider.MostRecent;
+    MBListElement<string>[] Dates => DataPointProvider.ComparedExtendedAll.Keys.Select(k => new MBListElement<string> { SelectedValue = k.ToLongDateString(), Label = k.ToLongDateString() }).ToArray();
+    private List<ComparedExtendedDataPoint> data_source => Date == null ? DataPointProvider.ComparedExtendedCurrent : DataPointProvider.ComparedExtendedAll[DateTime.Parse(Date)];
+    private string Date { get; set; } = DataPointProvider.MostRecent.ToLongDateString();
 }

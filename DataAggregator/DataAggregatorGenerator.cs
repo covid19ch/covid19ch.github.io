@@ -41,7 +41,7 @@ namespace DataAggregator
                 var files = context.AdditionalFiles.Where(i => i.Path.EndsWith("xlsx")).OrderBy(f => f.Path).ToList();
                 context.ReportDiagnostic(Diagnostic.Create(FileProcessed, null, files.Count));
                 var dates = new HashSet<DateTime>();
-                var All = new Dictionary<string, List<DataPoint>>();
+                var All = new Dictionary<DateTime, List<DataPoint>>();
                 foreach (var input_file in files)
                 {
                     using var stream = File.OpenRead(input_file.Path);
@@ -62,14 +62,13 @@ namespace DataAggregator
                     var identifier = $"stats_{rows.Last().Date.Year}_{rows.Last().Date.Month}_{rows.Last().Date.Day}";
                     if (dates.Add(rows.Last().Date))
                     {
-                        All.Add(identifier, data_points);
+                        All.Add(rows.Last().Date, data_points);
                         context.ReportDiagnostic(Diagnostic.Create(FileProcessed, null, input_file.Path));
                     }
                 }
                 var last_day = dates.OrderBy(v => v).Last();
                 var MostRecent = last_day.ToLongDateString();
-                var last_day_identifier = $"stats_{last_day.Year}_{last_day.Month}_{last_day.Day}";
-                var Current = All[last_day_identifier];
+                var Current = All[last_day];
                 var ExtendedCurrent = Current.SevenDayAverages().OrderByDescending(v => v.Date).Take(62).ToList();
                 var ExtendedAll = All.ToDictionary(e => e.Key, e => e.Value.SevenDayAverages().OrderByDescending(v => v.Date).Take(62).PrependUpTo(Current.Max(d => d.Date)).ToList());
                 var ComparedExtendedCurrent = ExtendedCurrent.Compare(ExtendedAll);
@@ -78,13 +77,16 @@ namespace DataAggregator
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.Json;
 namespace CovidStatsCH.Components
 {{
     public partial class DataPointProvider
     {{
-        public static readonly string MostRecent = ""{last_day.ToLongDateString()}"";
-        public static readonly List<ComparedExtendedDataPoint> ComparedExtendedCurrent = JsonSerializer.Deserialize<List<ComparedExtendedDataPoint>>({JsonSerializer.Serialize(ComparedExtendedCurrent)});
-        public static readonly Dictionary<string, List<ComparedExtendedDataPoint>> ComparedExtendedAll = JsonSerializer.Deserialize<Dictionary<string, List<ComparedExtendedDataPoint>>>({JsonSerializer.Serialize(ComparedExtendedAll)});
+        public static readonly DateTime MostRecent = DateTime.Parse(""{last_day.ToLongDateString()}"");
+        public static readonly List<ExtendedDataPoint> ExtendedCurrent = JsonSerializer.Deserialize<List<ExtendedDataPoint>>(""{JsonSerializer.Serialize(ExtendedCurrent).Replace("\"", "\\\"")}"");
+        public static readonly Dictionary<DateTime, List<ExtendedDataPoint>> ExtendedAll = JsonSerializer.Deserialize<Dictionary<DateTime, List<ExtendedDataPoint>>>(""{JsonSerializer.Serialize(ExtendedAll).Replace("\"", "\\\"")}"");
+        public static readonly List<ComparedExtendedDataPoint> ComparedExtendedCurrent = JsonSerializer.Deserialize<List<ComparedExtendedDataPoint>>(""{JsonSerializer.Serialize(ComparedExtendedCurrent).Replace("\"", "\\\"")}"");
+        public static readonly Dictionary<DateTime, List<ComparedExtendedDataPoint>> ComparedExtendedAll = JsonSerializer.Deserialize<Dictionary<DateTime, List<ComparedExtendedDataPoint>>>(""{JsonSerializer.Serialize(ComparedExtendedAll).Replace("\"", "\\\"")}"");
         
     }}
 }}

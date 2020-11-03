@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace CovidStatsCH.Components
 {
@@ -9,6 +10,7 @@ namespace CovidStatsCH.Components
         public double? SevenDayAverageAWeekEarlier { get; set; }
         public int Unreliable { get; set; }
         public int SemiUnreliable { get; set; }
+        [JsonConstructor]
         public ExtendedInput()
         {
         }

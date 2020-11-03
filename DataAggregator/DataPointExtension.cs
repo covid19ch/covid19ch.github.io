@@ -37,7 +37,7 @@ namespace CovidStatsCH.Components
                 yield return enumerator.Current;
             }
         }
-        public static List<ComparedExtendedDataPoint> Compare(this List<ExtendedDataPoint> current, Dictionary<string, List<ExtendedDataPoint>> all)
+        public static List<ComparedExtendedDataPoint> Compare(this List<ExtendedDataPoint> current, Dictionary<DateTime, List<ExtendedDataPoint>> all)
         {
             var previous = DataPointProvider.Previous(current, all);
             if (previous == default)

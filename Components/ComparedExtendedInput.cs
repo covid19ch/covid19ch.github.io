@@ -26,5 +26,8 @@
             SevenDayAverageAWeekEarlier = input.SevenDayAverageAWeekEarlier;
             Unreliable = input.Unreliable;
         }
+        public ComparedExtendedInput()
+        {
+        }
     }
 }

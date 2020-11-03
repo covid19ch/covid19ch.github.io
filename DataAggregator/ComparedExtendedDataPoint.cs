@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace CovidStatsCH.Components
 {
@@ -8,6 +9,10 @@ namespace CovidStatsCH.Components
         public ComparedExtendedInput Cases { get; set; }
         public ComparedExtendedInput Hospitalisations { get; set; }
         public ComparedExtendedInput Deaths { get; set; }
+        [JsonConstructor]
+        public ComparedExtendedDataPoint()
+        {
+        }
         public ComparedExtendedDataPoint(ExtendedDataPoint current)
         {
             Date = current.Date;

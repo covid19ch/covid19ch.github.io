@@ -87,7 +87,7 @@
     private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> cases = (d) => d.Cases;
     private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> hospitalizations = (d) => d.Hospitalisations;
     private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> deaths = (d) => d.Deaths;
-    List<string> Dates => DataPointProvider.All.Keys.ToList();
+    List<DateTime> Dates => DataPointProvider.ComparedExtendedAll.Keys.ToList();
     private Func<ComparedExtendedDataPoint, ComparedExtendedInput> type => Type switch
     {
         "Cases" => cases,
@@ -95,11 +95,11 @@
         "Deaths" => deaths,
         _ => cases
     };
-    private Dictionary<string, List<int?>> delays => DataPointProvider.ComparedExtendedAll
+    private Dictionary<DateTime, List<int?>> delays => DataPointProvider.ComparedExtendedAll
         .Where(kv => kv.Value.Any(e => type(e).Additional != null))
         .ToDictionary(kv => kv.Key, kv => 
             kv.Value
-                .SkipWhile(e => e.Date.Date >= DateTime.Parse(kv.Key).Date)
+                .SkipWhile(e => e.Date.Date >= kv.Key)
                 .Select(e => type(e).Additional)
                 .Reverse()
                 .SkipWhile(e => e == 0)
@@ -109,7 +109,7 @@
     private class Delays
     {
         public string RelativeDay {get;set;}
-        public string ReportDay {get;set;}
+        public DateTime ReportDay {get;set;}
         public double Value {get;set;}
     }
     private List<Delays> delays_as_series => delays.Keys.SelectMany(key => Enumerable.Range(0, 7).Select(i => new Delays 
