@@ -1,0 +1,70 @@
+name: Fetching data from BAG
+
+env:
+  bag_url: https://www.bag.admin.ch/dam/bag/de/dokumente/mt/k-und-i/aktuelle-ausbrueche-pandemien/2019-nCoV/covid-19-datengrundlage-lagebericht.xlsx.download.xlsx/200325_Datengrundlage_Grafiken_COVID-19-Bericht.xlsx
+  dotnet_version: 5.0.100-rc.2.20479.15
+  project_name: "ClientSide/ClientSide.csproj"
+  base_href: /
+  target_framework: net5.0
+  
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    # check out repo and add file from BAG
+    - uses: actions/checkout@master
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y_%m_%d')"
+    - name: wget
+      uses: wei/wget@v1
+      with:
+        args: ${{ env.bag_url }} -O Data/${{ steps.date.outputs.date }}.xlsx
+    - name: Commit files
+      run: |
+        git config --local user.email "noreply@automation.none"
+        git config --local user.name "Automation"
+        git add Data/${{ steps.date.outputs.date }}.xlsx
+        git commit -m "Add current file"
+      continue-on-error: true
+    # push changes to persist new state
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
+    
+    # build, publish & deploy new state
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ env.dotnet_version }}
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build -c Release --no-restore
+    - name: Publish
+      run: dotnet publish ${{ env.project_name }} -f ${{ env.target_framework }} -c Release -o app/publish
+    - name: Rewrite base href
+      uses: SteveSandersonMS/ghaction-rewrite-base-href@v1
+      with:
+        html_path: app/publish/wwwroot/index.html
+        base_href: ${{ env.base_href }}
+    - name: add .nojekyll
+      run: touch app/publish/wwwroot/.nojekyll
+    - name: write git commit id
+      run: echo -n "${GITHUB_SHA}" > app/publish/wwwroot/commit.txt
+    - name: Deploy to Github Pages
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BASE_BRANCH: main # The branch the action should deploy from.
+        BRANCH: gh-pages # The branch the action should deploy to.
+        FOLDER: app/publish/wwwroot # The folder the action should deploy.
+        SINGLE_COMMIT: true
