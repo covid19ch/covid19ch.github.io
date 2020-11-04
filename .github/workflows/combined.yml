@@ -14,8 +14,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    # check out repo and add file from BAG
-    - uses: actions/checkout@master
+    - uses: actions/checkout@master    # check out repo and add file from BAG
       with:
         persist-credentials: false
         fetch-depth: 0
@@ -33,15 +32,12 @@ jobs:
         git add Data/${{ steps.date.outputs.date }}.xlsx
         git commit -m "Add current file"
       continue-on-error: true
-    # push changes to persist new state
-    - name: Push changes
+    - name: Push changes    # push changes to persist new state
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         branch: ${{ github.ref }}
-    
-    # build, publish & deploy new state
-    - name: Setup .NET Core
+    - name: Setup .NET Core    # build, publish & deploy new state
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: ${{ env.dotnet_version }}
