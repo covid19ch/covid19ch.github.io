@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  fetch:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master    # check out repo and add file from BAG
@@ -27,7 +27,7 @@ jobs:
         args: ${{ env.bag_url }} -O Data/${{ steps.date.outputs.date }}.xlsx
     - name: Commit files
       run: |
-        git config --local user.email "noreply@automation.none"
+        git config --local user.email "stefan.loerwald@gmail.com"
         git config --local user.name "Automation"
         git add Data/${{ steps.date.outputs.date }}.xlsx
         git commit -m "Add current file"
@@ -37,6 +37,11 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         branch: ${{ github.ref }}
+  deploy:
+    needs: fetch
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
     - name: Setup .NET Core    # build, publish & deploy new state
       uses: actions/setup-dotnet@v1
       with:
