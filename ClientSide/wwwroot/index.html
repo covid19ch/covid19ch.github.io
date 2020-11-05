@@ -39,6 +39,7 @@
         }(window.location))
     </script>
     <!-- End Single Page Apps for GitHub Pages -->
+    
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
     <link href="_content/DevExpress.Blazor/dx-blazor.css" rel="stylesheet" />
     <link href="_content/CovidStatsCH.Components/site.css" rel="stylesheet" />
@@ -52,9 +53,11 @@
         <div style="height: 100vh;" class="horizontally-centered">
     <h2 class="mdc-typography--headline2" style="text-align:center">Covid-19 situation in Switzerland</h2>
     <p>All data gathered from <a href="https://www.bag.admin.ch/">BAG</a>. No warranty for correctness. This site is not affiliated with the BAG in any way.</p>
-        <div class="centered">
-            Loading...
-        </div>
+    <div class="centered">
+        Loading...
+    </div>
+        <div class="centered" id="commit-hash"></div>
+    <script>fetch('commit.txt').then(response => response.text()).then(data => document.getElementById('commit-hash').innerHTML = data)</script>
 </div>
     </app>
 
