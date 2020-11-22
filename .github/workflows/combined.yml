@@ -2,7 +2,7 @@ name: Combined workflow
 
 env:
   bag_url: https://www.bag.admin.ch/dam/bag/de/dokumente/mt/k-und-i/aktuelle-ausbrueche-pandemien/2019-nCoV/covid-19-datengrundlage-lagebericht.xlsx.download.xlsx/200325_Datengrundlage_Grafiken_COVID-19-Bericht.xlsx
-  dotnet_version: 5.0.100-rc.2.20479.15
+  dotnet_version: 5.0.100
   project_name: "ClientSide/ClientSide.csproj"
   base_href: /
   target_framework: net5.0
