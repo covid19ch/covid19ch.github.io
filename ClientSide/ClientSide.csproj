@@ -1,24 +1,21 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
-	<Import Project="..\Components\build\*.targets" />
-	<Target Name="GenerateBlazorEntrypoint" BeforeTargets="BeforeBuild">
-		<GenerateBlazorEntrypointTask BlazorEnvironment="wasm" Template="..\Components\build\index.html" />
-	</Target>
-	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
-		<RootNamespace>CovidStatsCH.Client</RootNamespace>
-		<BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
-		<DxExtendStartupHost>False</DxExtendStartupHost>
-		<PublishTrimmed>false</PublishTrimmed>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.0-rc.2.20475.17" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.0-rc.2.20475.17" PrivateAssets="all" />
-		<PackageReference Include="System.Net.Http.Json" Version="5.0.0-rc.2.20475.5" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\Components\Components.csproj" />
-	</ItemGroup>
-
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+  <Import Project="..\Components\build\*.targets" />
+  <Target Name="GenerateBlazorEntrypoint" BeforeTargets="BeforeBuild">
+    <GenerateBlazorEntrypointTask BlazorEnvironment="wasm" Template="..\Components\build\index.html" />
+  </Target>
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>CovidStatsCH.Client</RootNamespace>
+    <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+    <DxExtendStartupHost>False</DxExtendStartupHost>
+    <PublishTrimmed>false</PublishTrimmed>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.0" PrivateAssets="all" />
+    <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Components\Components.csproj" />
+  </ItemGroup>
 </Project>

@@ -1,26 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
-
-	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
-		<PackageId>CovidStatsCH.Components</PackageId>
-		<RootNamespace>CovidStatsCH.Components</RootNamespace>
-		<LangVersion>preview</LangVersion>
-		<DxExtendStartupHost>False</DxExtendStartupHost>
-	</PropertyGroup>
-
-
-	<ItemGroup>
-		<SupportedPlatform Include="browser" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="DevExpress.Blazor" Version="20.1.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.0-rc.2.20475.17" />
-		<PackageReference Include="Material.Blazor" Version="1.1.2" />
-	</ItemGroup>
-	<ItemGroup>
-		<AdditionalFiles Include="../Data/**/*" />
-		<ProjectReference Include="../DataAggregator/DataAggregator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-	</ItemGroup>
-
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <PackageId>CovidStatsCH.Components</PackageId>
+    <RootNamespace>CovidStatsCH.Components</RootNamespace>
+    <LangVersion>preview</LangVersion>
+    <DxExtendStartupHost>False</DxExtendStartupHost>
+  </PropertyGroup>
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DevExpress.Blazor" Version="20.1.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.0" />
+    <PackageReference Include="Material.Blazor" Version="1.1.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="../Data/**/*" />
+    <ProjectReference Include="../DataAggregator/DataAggregator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
 </Project>
