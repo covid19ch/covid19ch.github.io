@@ -3,7 +3,9 @@ using ExcelDataReader;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -21,6 +23,14 @@ namespace DataAggregator
             defaultSeverity: DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
             description: ".");
+        private static readonly DiagnosticDescriptor Compressed = new DiagnosticDescriptor(
+            id: "DA0002",
+            title: "Data compressed",
+            messageFormat: "{0} bytes compressed to {1} bytes ({2}%)",
+            category: "Build",
+            defaultSeverity: DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: ".");
         private static readonly DiagnosticDescriptor Error = new DiagnosticDescriptor(
             id: "DA9999",
             title: "Exception in SG",
@@ -31,7 +41,7 @@ namespace DataAggregator
             description: ".");
         public void Execute(GeneratorExecutionContext context)
         {
-            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             if (context.AdditionalFiles == null)
             {
                 return;
@@ -73,20 +83,69 @@ namespace DataAggregator
                 var ExtendedAll = All.ToDictionary(e => e.Key, e => e.Value.SevenDayAverages().OrderByDescending(v => v.Date).Take(62).PrependUpTo(Current.Max(d => d.Date)).ToList());
                 var ComparedExtendedCurrent = ExtendedCurrent.Compare(ExtendedAll);
                 var ComparedExtendedAll = ExtendedAll.ToDictionary(e => e.Key, e => e.Value.Compare(ExtendedAll));
+                var extended_current_serialized_uncompressed = JsonSerializer.Serialize(ExtendedCurrent);
+                var extended_current_serialized_compressed = Compress(extended_current_serialized_uncompressed);
+                if (Decompress(extended_current_serialized_compressed) != extended_current_serialized_uncompressed)
+                {
+                    throw new Exception($"1 Bad compression {extended_current_serialized_compressed.Length} -> {Decompress(extended_current_serialized_compressed).Length} vs {extended_current_serialized_uncompressed.Length}");
+                }
+                context.ReportDiagnostic(Diagnostic.Create(Compressed, null, extended_current_serialized_uncompressed.Length, extended_current_serialized_compressed.Length,
+                    100 * extended_current_serialized_compressed.Length / (double)extended_current_serialized_uncompressed.Length));
+                var extended_all_serialized_uncompressed = JsonSerializer.Serialize(ExtendedAll);
+                var extended_all_serialized_compressed = Compress(extended_all_serialized_uncompressed);
+                if (Decompress(extended_all_serialized_compressed) != extended_all_serialized_uncompressed)
+                {
+                    throw new Exception($"2 Bad compression {Decompress(extended_all_serialized_compressed).Length} vs {extended_all_serialized_uncompressed.Length}");
+                }
+                context.ReportDiagnostic(Diagnostic.Create(Compressed, null, extended_all_serialized_uncompressed.Length, extended_all_serialized_compressed.Length,
+                    100 * extended_all_serialized_compressed.Length / (double)extended_all_serialized_uncompressed.Length));
+                var compared_extended_current_serialized_uncompressed = JsonSerializer.Serialize(ComparedExtendedCurrent);
+                var compared_extended_current_serialized_compressed = Compress(compared_extended_current_serialized_uncompressed);
+                if (Decompress(compared_extended_current_serialized_compressed) != compared_extended_current_serialized_uncompressed)
+                {
+                    throw new Exception($"3 Bad compression {Decompress(compared_extended_current_serialized_compressed).Length} vs {compared_extended_current_serialized_uncompressed.Length}");
+                }
+                context.ReportDiagnostic(Diagnostic.Create(Compressed, null, compared_extended_current_serialized_uncompressed.Length, compared_extended_current_serialized_compressed.Length,
+                    100 * compared_extended_current_serialized_compressed.Length / (double)compared_extended_current_serialized_uncompressed.Length));
+                var compared_extended_all_serialized_uncompressed = JsonSerializer.Serialize(ComparedExtendedAll);
+                var compared_extended_all_serialized_compressed = Compress(compared_extended_all_serialized_uncompressed);
+                if (Decompress(compared_extended_all_serialized_compressed) != compared_extended_all_serialized_uncompressed)
+                {
+                    throw new Exception($"4 Bad compression {Decompress(compared_extended_all_serialized_compressed).Length} vs {compared_extended_all_serialized_uncompressed.Length}");
+                }
+                context.ReportDiagnostic(Diagnostic.Create(Compressed, null, compared_extended_all_serialized_uncompressed.Length, compared_extended_all_serialized_compressed.Length,
+                    100 * compared_extended_all_serialized_compressed.Length / (double)compared_extended_all_serialized_uncompressed.Length));
                 var final_code = $@"
 using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.Json;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
 namespace CovidStatsCH.Components
 {{
     public partial class DataPointProvider
     {{
+        private static string Decompress(string input)
+        {{
+            using var input_stream = new MemoryStream(Convert.FromBase64String(input));
+            using var compression_stream = new GZipStream(input_stream, CompressionMode.Decompress);
+            using var output_stream = new MemoryStream();
+            compression_stream.CopyTo(output_stream);
+            var output_buffer = output_stream.ToArray();
+            return Encoding.ASCII.GetString(output_buffer);
+        }}
         public static readonly DateTime MostRecent = DateTime.Parse(""{last_day.ToLongDateString()}"");
-        public static readonly List<ExtendedDataPoint> ExtendedCurrent = JsonSerializer.Deserialize<List<ExtendedDataPoint>>(""{JsonSerializer.Serialize(ExtendedCurrent).Replace("\"", "\\\"")}"");
-        public static readonly Dictionary<DateTime, List<ExtendedDataPoint>> ExtendedAll = JsonSerializer.Deserialize<Dictionary<DateTime, List<ExtendedDataPoint>>>(""{JsonSerializer.Serialize(ExtendedAll).Replace("\"", "\\\"")}"");
-        public static readonly List<ComparedExtendedDataPoint> ComparedExtendedCurrent = JsonSerializer.Deserialize<List<ComparedExtendedDataPoint>>(""{JsonSerializer.Serialize(ComparedExtendedCurrent).Replace("\"", "\\\"")}"");
-        public static readonly Dictionary<DateTime, List<ComparedExtendedDataPoint>> ComparedExtendedAll = JsonSerializer.Deserialize<Dictionary<DateTime, List<ComparedExtendedDataPoint>>>(""{JsonSerializer.Serialize(ComparedExtendedAll).Replace("\"", "\\\"")}"");
+        public static readonly List<ExtendedDataPoint> ExtendedCurrent = JsonSerializer.Deserialize<List<ExtendedDataPoint>>(Decompress(""{extended_current_serialized_compressed}""));
+        public static readonly Dictionary<DateTime, List<ExtendedDataPoint>> ExtendedAll = JsonSerializer.Deserialize<Dictionary<DateTime, List<ExtendedDataPoint>>>(Decompress(""{extended_all_serialized_compressed}""));
+        public static readonly List<ComparedExtendedDataPoint> ComparedExtendedCurrent = JsonSerializer.Deserialize<List<ComparedExtendedDataPoint>>(Decompress(""{compared_extended_current_serialized_compressed}""));
+        public static readonly Dictionary<DateTime, List<ComparedExtendedDataPoint>> ComparedExtendedAll = JsonSerializer.Deserialize<Dictionary<DateTime, List<ComparedExtendedDataPoint>>>(Decompress(""{compared_extended_all_serialized_compressed}""));
         
     }}
 }}
@@ -97,6 +156,25 @@ namespace CovidStatsCH.Components
             {
                 context.ReportDiagnostic(Diagnostic.Create(Error, null, e.Message, e.StackTrace));
             }
+        }
+        private static string Compress(string input)
+        {
+            var data = Encoding.ASCII.GetBytes(input);
+            using var output_stream = new MemoryStream();
+            using var compression_stream = new GZipStream(output_stream, CompressionMode.Compress);
+            compression_stream.Write(data, 0, data.Length);
+            compression_stream.Close();
+            var output_buffer = output_stream.ToArray();
+            return Convert.ToBase64String(output_buffer);
+        }
+        private static string Decompress(string input)
+        {
+            using var input_stream = new MemoryStream(Convert.FromBase64String(input));
+            using var compression_stream = new GZipStream(input_stream, CompressionMode.Decompress);
+            using var output_stream = new MemoryStream();
+            compression_stream.CopyTo(output_stream);
+            var output_buffer = output_stream.ToArray();
+            return Encoding.ASCII.GetString(output_buffer);
         }
         private class Row
         {
