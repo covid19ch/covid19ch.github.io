@@ -88,17 +88,17 @@
 </MBDataTable>
 
 @code {
-    MBListElement<string>[] Types = new MBListElement<string>[]
+    MBSelectElement<string>[] Types = new MBSelectElement<string>[]
     {
-        new MBListElement<string> { SelectedValue = "Cases", Label = "Cases" },
-        new MBListElement<string> { SelectedValue = "Hospitalisations", Label = "Hospitalisations" },
-        new MBListElement<string> { SelectedValue = "Deaths", Label = "Deaths" }
+        new MBSelectElement<string> { SelectedValue = "Cases", Label = "Cases" },
+        new MBSelectElement<string> { SelectedValue = "Hospitalisations", Label = "Hospitalisations" },
+        new MBSelectElement<string> { SelectedValue = "Deaths", Label = "Deaths" }
         };
     private string Type { get; set; } = "Cases";
     private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> cases = (d) => d.Cases;
     private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> hospitalizations = (d) => d.Hospitalisations;
     private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> deaths = (d) => d.Deaths;
-    MBListElement<string>[] Dates => DataPointProvider.ComparedExtendedAll.Keys.Select(k => new MBListElement<string> { SelectedValue = k.ToLongDateString(), Label = k.ToLongDateString() }).ToArray();
+    MBSelectElement<string>[] Dates => DataPointProvider.ComparedExtendedAll.Keys.Select(k => new MBSelectElement<string> { SelectedValue = k.ToLongDateString(), Label = k.ToLongDateString() }).ToArray();
     private List<ComparedExtendedDataPoint> data_source => Date == null ? DataPointProvider.ComparedExtendedCurrent : DataPointProvider.ComparedExtendedAll[DateTime.Parse(Date)];
     private string Date { get; set; } = DataPointProvider.MostRecent.ToLongDateString();
 }
