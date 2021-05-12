@@ -11,8 +11,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.Blazor" Version="20.1.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.5" />
-    <PackageReference Include="Material.Blazor" Version="1.1.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.6" />
+    <PackageReference Include="Material.Blazor" Version="2.0.0-preview.6" />
   </ItemGroup>
   <ItemGroup>
     <AdditionalFiles Include="../Data/**/*" />
