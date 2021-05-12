@@ -35,12 +35,12 @@
     private bool Logarithmic {get;set;}
     private class Data
     {
-        public DateTime Day { get; set; } 
+        public DateTime Day { get; set; }
         public double Value { get; set; }
         public string Type { get; set; }
     }
     private List<Data> projection => DataPointProvider.ComparedExtendedCurrent.Select(e => new Data { Day = e.Date, Value = type(e).Cumulative, Type= "Past" }).OrderByDescending(v => v.Day).Skip(3).Take(18).Concat(GetForecast()).ToList();
-    
+
     Func<ComparedExtendedDataPoint, ComparedExtendedInput> type => Type switch
     {
         "Cases" => cases,
@@ -64,12 +64,12 @@
         }
         return forecast;
     }
-    MBListElement<string>[] Types = new MBListElement<string>[]
-    {
-        new MBListElement<string> { SelectedValue = "Cases", Label = "Cases" },
-        new MBListElement<string> { SelectedValue = "Hospitalisations", Label = "Hospitalisations" },
-        new MBListElement<string> { SelectedValue = "Deaths", Label = "Deaths" }
-        };
+    MBSelectElement<string>[] Types = new MBSelectElement<string>[]
+{
+        new MBSelectElement<string> { SelectedValue = "Cases", Label = "Cases" },
+        new MBSelectElement<string> { SelectedValue = "Hospitalisations", Label = "Hospitalisations" },
+        new MBSelectElement<string> { SelectedValue = "Deaths", Label = "Deaths" }
+    };
     private string Type { get; set; } = "Cases";
     private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> cases = (d) => d.Cases;
     private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> hospitalizations = (d) => d.Hospitalisations;

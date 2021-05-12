@@ -77,12 +77,12 @@
 
 @code {
     private bool AbsoluteValues { get; set; }
-    MBListElement<string>[] Types = new MBListElement<string>[]
-    {
-        new MBListElement<string> { SelectedValue = "Cases", Label = "Cases" },
-        new MBListElement<string> { SelectedValue = "Hospitalisations", Label = "Hospitalisations" },
-        new MBListElement<string> { SelectedValue = "Deaths", Label = "Deaths" }
-        };
+    MBSelectElement<string>[] Types = new MBSelectElement<string>[]
+{
+        new MBSelectElement<string> { SelectedValue = "Cases", Label = "Cases" },
+        new MBSelectElement<string> { SelectedValue = "Hospitalisations", Label = "Hospitalisations" },
+        new MBSelectElement<string> { SelectedValue = "Deaths", Label = "Deaths" }
+    };
     private string Type { get; set; } = "Cases";
     private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> cases = (d) => d.Cases;
     private static Func<ComparedExtendedDataPoint, ComparedExtendedInput> hospitalizations = (d) => d.Hospitalisations;
@@ -97,7 +97,7 @@
     };
     private Dictionary<DateTime, List<int?>> delays => DataPointProvider.ComparedExtendedAll
         .Where(kv => kv.Value.Any(e => type(e).Additional != null))
-        .ToDictionary(kv => kv.Key, kv => 
+        .ToDictionary(kv => kv.Key, kv =>
             kv.Value
                 .SkipWhile(e => e.Date.Date >= kv.Key)
                 .Select(e => type(e).Additional)
@@ -112,13 +112,13 @@
         public DateTime ReportDay {get;set;}
         public double Value {get;set;}
     }
-    private List<Delays> delays_as_series => delays.Keys.SelectMany(key => Enumerable.Range(0, 7).Select(i => new Delays 
-    { 
+    private List<Delays> delays_as_series => delays.Keys.SelectMany(key => Enumerable.Range(0, 7).Select(i => new Delays
+    {
         RelativeDay = "-" + (i + 1).ToString() + "d",
         ReportDay = key,
         Value = (i < delays[key].Count) ? (delays[key][i] ?? 0) / (AbsoluteValues ? 1 : delays[key].Where(v => v != null).Sum(v => (double)v.Value)) : 0
-    }).Append(new Delays 
-    { 
+    }).Append(new Delays
+    {
         RelativeDay = ">-7d",
         ReportDay = key,
         Value = delays[key].Skip(7).Select(v => v ?? 0).Sum() / (AbsoluteValues ? 1 : delays[key].Where(v => v != null).Sum(v => (double)v.Value))
