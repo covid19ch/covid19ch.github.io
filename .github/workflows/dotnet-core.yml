@@ -1,7 +1,7 @@
 name: .NET Core deploy to GitHub pages
 
 env:
-  dotnet_version: 5.0.200
+  dotnet_version: 5.0.301
   project_name: "ClientSide/ClientSide.csproj"
   base_href: /
   target_framework: net5.0
