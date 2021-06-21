@@ -3,7 +3,6 @@ using ExcelDataReader;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -12,6 +11,22 @@ using System.Text.Json;
 
 namespace DataAggregator
 {
+    public static class Linq
+    {
+        public static IEnumerable<T> TakeLast<T>(this IEnumerable<T> enumerable, int count)
+        {
+            var buffer = new Queue<T>(capacity: count);
+            foreach (var element in enumerable)
+            {
+                if (buffer.Count == count)
+                {
+                    _ = buffer.Dequeue();
+                }
+                buffer.Enqueue(element);
+            }
+            return buffer;
+        }
+    }
     [Generator]
     public partial class DataAggregatorGenerator : ISourceGenerator
     {
@@ -48,7 +63,7 @@ namespace DataAggregator
             }
             try
             {
-                var files = context.AdditionalFiles.Where(i => i.Path.EndsWith("xlsx")).OrderBy(f => f.Path).ToList();
+                var files = context.AdditionalFiles.Where(i => i.Path.EndsWith("xlsx")).OrderBy(f => f.Path).TakeLast(10).ToList();
                 context.ReportDiagnostic(Diagnostic.Create(FileProcessed, null, files.Count));
                 var dates = new HashSet<DateTime>();
                 var All = new Dictionary<DateTime, List<DataPoint>>();
