@@ -24,22 +24,29 @@
     var current_growth = type(current_data_source[4]).SevenDayAverage / type(current_data_source[11]).SevenDayAverage;
     var current_daily_growth = current_growth == null ? default(double?) : Math.Pow(current_growth.Value, 1.0 / 7.0);
     var current_cummulative = type(current_data_source[0]).Cumulative;
-    var faraway_days = (DataPointProvider.Population - (double) current_cummulative) / current_new;
+    var faraway_days = (DataPointProvider.Population - (double)current_cummulative) / current_new;
     var r = faraway_days - 1.0;
     var doomsday_days = current_daily_growth == null ? default(double?) : Math.Log(r * current_daily_growth.Value - r) / Math.Log(current_daily_growth.Value);
 }
 @if (doomsday_days != null)
 {
     var subject = Type.ToLower();
-    var verb = Type switch 
+    var verb = Type switch
     {
         "Cases" => "infected",
         "Hospitalisations" => "hospitalised",
         "Deaths" => "dead",
         _ => "infected"
     };
-    <p>Would the number of @subject continue to rise as it does now (times @(Math.Round(current_growth.Value, 1)) per week), then the entire population would be @verb by @DateTime.Now.AddDays(doomsday_days.Value).Date.ToLongDateString()</p>
-    <p>Would the number of @subject stay the same as it is now (about @(current_new) a day, the 7-day-average), then the entire population would be @verb by @DateTime.Now.AddDays(faraway_days).Date.ToLongDateString()</p>
+    @if (doomsday_days.Value <= 0 || double.IsNaN(doomsday_days.Value))
+    {
+        <p>Would the number of @subject continue to decrease as it does now (times @(Math.Round(current_growth.Value, 1)) per week), then we're not in a doomsday scenario.</p>
+    }
+    else
+    {
+        <p>Would the number of @subject continue to rise as it does now (times @(Math.Round(current_growth.Value, 1)) per week), then the entire population would be @verb in @doomsday_days.Value days</p>
+    }
+    <p>Would the number of @subject stay the same as it is now (about @(current_new) a day, the 7-day-average), then the entire population would be @verb by @Math.Round(faraway_days, 0) days</p>
 }
 <p>You might also be interested in the <a href="delay">delay in reporting of new cases</a>.</p>
 <p>You might also be interested in the <a href="forecast">primitive forecast</a>.</p>
@@ -73,7 +80,8 @@
             var doubling = 1 / Math.Log2(Math.Pow(factor, 1.0 / 7.0));
             var doubling_string = (factor <= 1 || data.SevenDayAverage == null || data.SevenDayAverageAWeekEarlier == null) ? null : Math.Round(doubling, 1).ToString();
         }
-        <td class="mdc-data-table__cell">@data.New @if (data.Additional != null) { <text> (@(data.Additional.Value > 0 ? "+" : "")@(data.Additional.Value))</text> }</td>
+        <td class="mdc-data-table__cell">@data.New @if (data.Additional != null)
+        {<text> (@(data.Additional.Value > 0 ? "+" : "")@(data.Additional.Value))</text>}</td>
         <td class="mdc-data-table__cell">@data.Cumulative</td>
         <td class="mdc-data-table__cell">@Math.Round(100 * data.Cumulative / (double)DataPointProvider.Population, 2)</td>
         <td class="mdc-data-table__cell" style="color: @(color)">
