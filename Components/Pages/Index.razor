@@ -4,7 +4,7 @@
 
 <h2 class="mdc-typography--headline2" style="text-align:center">Covid-19 situation in Switzerland</h2>
 <p>All data gathered from <a href="https://www.bag.admin.ch/">BAG</a>. No warranty for correctness. This site is not affiliated with the BAG in any way.</p>
-            
+
 
 <div style="display: grid;grid-template-columns: 1fr 1fr;grid-column-gap: 1em;">
     <MBSelect @bind-Value="Type" Label="What to display" Items="Types" />
@@ -44,7 +44,7 @@
     }
     else
     {
-        <p>Would the number of @subject continue to rise as it does now (times @(Math.Round(current_growth.Value, 1)) per week), then the entire population would be @verb in @doomsday_days.Value days</p>
+        <p>Would the number of @subject continue to rise as it does now (times @(Math.Round(current_growth.Value, 1)) per week), then the entire population would be @verb in @Math.Round(doomsday_days.Value, 0) days</p>
     }
     <p>Would the number of @subject stay the same as it is now (about @(current_new) a day, the 7-day-average), then the entire population would be @verb by @Math.Round(faraway_days, 0) days</p>
 }
